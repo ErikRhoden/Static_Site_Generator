@@ -31,5 +31,11 @@ class TestHTMLNode(unittest.TestCase):
         expected = "HTMLNode('p', 'This is text inside a paragraph', [HTMLNode('span', 'child text', [], None)], {'class': 'text-muted'})"
         self.assertEqual(result, expected)
 
+    def test_node_without_tag(self):
+        node = HTMLNode(value="This is text inside a tagless node")
+        result = repr(node)
+        expected = "HTMLNode(None, 'This is text inside a tagless node', [], None)"
+        self.assertEqual(result, expected)
+
 if __name__ == "__main__":
     unittest.main()
