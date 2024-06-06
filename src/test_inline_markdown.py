@@ -65,6 +65,64 @@ class TestDelimiter(unittest.TestCase):
             new_nodes,
         )
 
+class TestRegex(unittest.TestCase):
+    def test_img(self):
+        text = extract_markdown_images("This is text with an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png)")
+        self.assertEqual(text, [("image", "https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png")])
+
+    def test_link(self):
+        text = extract_markdown_links(text = "This is text with a [link](https://www.example.com) and [another](https://www.example.com/another)")
+        self.assertEqual(text, [("link", "https://www.example.com"), ("another", "https://www.example.com/another")])
+
+class TestSplitImageLinks(unittest.TestCase):
+    def test_img(self):
+        images = TextNode(
+            "This is text with an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and another ![second image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/3elNhQu.png)",
+            text_type_text,
+        )
+        new_images = split_nodes_image([images])
+        self.assertListEqual(new_images, [
+                TextNode("This is text with an ", text_type_text),
+                TextNode("image", text_type_image, "https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png"),
+                TextNode(" and another ", text_type_text),
+                TextNode("second image", text_type_image, "https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/3elNhQu.png")
+            ])
+        
+    def test_links(self):
+        links = TextNode(
+            "This is text with a [link](https://example.com/link1) and another [second link](https://example.com/link2).",
+            text_type_text,
+        )
+        new_links = split_nodes_link([links])
+        self.assertListEqual(new_links, [
+                TextNode("This is text with a ", text_type_text),
+                TextNode("link", text_type_link, "https://example.com/link1"),
+                TextNode(" and another ", text_type_text),
+                TextNode("second link", text_type_link, "https://example.com/link2"),
+                TextNode(".", text_type_text)
+            ])
+        
+    def test_no_img(self):
+        no_images = TextNode(
+            "This is text without any images.", 
+            text_type_text,
+        )
+        new_no_images = split_nodes_image([no_images])
+        self.assertListEqual(new_no_images, [
+                TextNode("This is text without any images.", text_type_text)
+            ])
+        
+    def test_no_links(self):
+        no_links = TextNode(
+            "This is text without any links.", 
+            text_type_text,
+        )
+        new_no_links = split_nodes_link([no_links])
+        self.assertListEqual(new_no_links, [
+                TextNode("This is text without any links.", text_type_text)
+            ])
+        
+    
 
 if __name__ == "__main__":
     unittest.main()
