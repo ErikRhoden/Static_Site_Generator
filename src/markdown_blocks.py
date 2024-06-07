@@ -1,6 +1,8 @@
 from htmlnode import ParentNode
 from inline_markdown import text_to_textnodes
 from textnode import text_node_to_html_node
+from copystatic import *
+import os
 
 block_type_paragraph = "paragraph"
 block_type_heading = "heading"
@@ -144,3 +146,38 @@ def quote_to_html_node(block):
     content = " ".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.startswith("# "):
+            return line[2:].strip()
+    raise Exception("Invalid file: No h1 header found")
+
+def generate_page(from_path, template_path, dest_path):
+    try:
+        print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+        with open(from_path, 'r', encoding='utf-8') as md_file:
+            read_md = md_file.read()
+
+        with open(template_path, 'r', encoding='utf-8') as template_file:
+            read_template = template_file.read()
+
+        html = markdown_to_html_node(read_md).to_html()
+
+        title = extract_title(read_md)
+
+        final_html = read_template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+
+        dest_dir = os.path.dirname(dest_path)
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+
+        with open(dest_path, 'w', encoding='utf-8') as output_file:
+            output_file.write(final_html)
+                
+        print(f"Page successfully generated at {dest_path}")
+        
+    except Exception as e:
+        print(f"Error generating page: {e}")
