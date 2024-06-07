@@ -140,11 +140,8 @@ class TestSplitImageLinks(unittest.TestCase):
                 TextNode("link", text_type_link, "https://boot.dev"),
             ],
             nodes,
-        )
-
-        
+        )        
     
-
 if __name__ == "__main__":
     unittest.main()
 
